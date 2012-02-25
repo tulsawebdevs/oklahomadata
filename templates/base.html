@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Upload CSV</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="container">
+            <h1>#TulsaWebDevs Data Upload</h1>
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <ul class="nav">
+                            <li><a href="#">About</a></li>
+                            <li><a href="{% url upload_form %}">Upload Data</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="content">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

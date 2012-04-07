@@ -2,6 +2,7 @@
 Thumbs.db
 *~
 *.sqlite3
+*.swp
 bin
 build
 include

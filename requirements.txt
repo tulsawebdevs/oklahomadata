@@ -1,5 +1,7 @@
 django==1.4
+django-extensions==0.8
 psycopg2==2.4.1
 django_compressor==1.1
 geopy==0.94.1
 git+git://github.com/tulsawebdevs/django-boundaryservice.git
+south==0.7.4

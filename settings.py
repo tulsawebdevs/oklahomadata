@@ -132,6 +132,8 @@ INSTALLED_APPS = (
     # Third-party
     'boundaryservice',
     'compressor',
+    'django_extensions',
+    'south',
     'tastypie',
 
     #WebDevs
@@ -166,7 +168,8 @@ COMPRESS_ENABLED = False
 
 COMPRESS_ROOT = STATIC_ROOT
 
-SHAPEFILES_DIR = 'shapefiles'
+SHAPEFILES_SUBDIR = 'shapefiles'
+SHAPEFILES_DIR = 'media/%s' % SHAPEFILES_SUBDIR
 
 # Boundary Service demo settings
 API_DOMAIN = 'www.oklahomadata.org'

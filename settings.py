@@ -2,6 +2,8 @@
 import os
 
 DEBUG = False
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
 TEMPLATE_DEBUG = DEBUG
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +18,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
+        # 'ENGINE': 'django.contrib.gis.db.backends.postgis', # For postgis instances
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'db.sqlite3',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
@@ -65,7 +68,7 @@ STATIC_ROOT = "%s/static" % path('.')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static'
+STATIC_URL = '/static/'
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -77,7 +80,6 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '%s/static' % path('.'),
 )
 
 # List of finder classes that know how to find static files in
@@ -86,6 +88,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -95,7 +98,7 @@ SECRET_KEY = '=1jbeb0%5xv^pskjxkuh#%vfna09z(5ng2#jy)h4y8iz(2l9^g'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,16 +119,26 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    # Django
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
+    'django.contrib.gis',
+    'django.contrib.humanize',
     'django.contrib.messages',
+    'django.contrib.sessions',
+    #'django.contrib.sites',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+
+    # Third-party
+    'boundaryservice',
+    'compressor',
+    'django_extensions',
+    'south',
+    'tastypie',
+
+    #WebDevs
+    'boundary_demo',
     'datafile',
 )
 
@@ -151,3 +164,123 @@ LOGGING = {
         },
     }
 }
+
+COMPRESS_ENABLED = False
+
+COMPRESS_ROOT = STATIC_ROOT
+
+SHAPEFILES_SUBDIR = 'shapefiles'
+SHAPEFILES_DIR = 'media/%s' % SHAPEFILES_SUBDIR
+
+# Boundary Service demo settings
+API_DOMAIN = 'www.oklahomadata.org'
+EXAMPLE_SCOPE = 'Oklahoma'
+EXAMPLE_BOUNDARY_SET = 'municipal boundary'
+EXAMPLE_BOUNDARY_SETS = 'municipal boundaries' # plural
+EXAMPLE_BOUNDARY_SET_CODE = 'municipal-boundaries'
+EXAMPLE_BOUNDARY_SET_CODE_BIS = 'counties' # "bis" is latin for "again"
+EXAMPLE_BOUNDARY_SET_RESPONSE = '''{
+    "authority": "CSA",
+    "boundaries": [
+        "/boundary/1.0/boundary/achille-municipal-boundary/",
+        "/boundary/1.0/boundary/adair-municipal-boundary/",
+        ...
+        ...
+        ...
+        "/boundary/1.0/boundary/yeager-municipal-boundary/",
+        "/boundary/1.0/boundary/yukon-municipal-boundary/",
+        "/boundary/1.0/boundary/yukon-municipal-boundary-2/"
+    ],
+    "count": 1485,
+    "domain": "Oklahoma",
+    "href": "",
+    "last_updated": "2012-03-15",
+    "metadata_fields": [
+        "ST_FIPS",
+        "CO_FIPS",
+        "CITYNAME",
+        "FIPS",
+        "FIPSCC",
+        "AD_VAL_NUM",
+        "LAST_ANNEX",
+        "LAST_VERIF",
+        "REMARKS"
+    ],
+    "name": "Municipal Boundaries",
+    "notes": "",
+    "resource_uri": "/boundary/1.0/boundary-set/municipal-boundaries/",
+    "slug": "municipal-boundaries"
+
+}'''
+EXAMPLE_BOUNDARY = 'Tulsa County'
+EXAMPLE_BOUNDARY_CODE = 'tulsa-county'
+EXAMPLE_BOUNDARY_RESPONSE = '''{
+    "centroid": {
+        "coordinates": [
+            -95.941506,
+            36.121079
+        ],
+        "type": "Point"
+    },
+    "external_id": "143",
+    "kind": "County",
+    "metadata": {
+        "COUNTY": 143,
+        "NAME": "TULSA",
+        "STATE": 40,
+        "STATEPLANE": "N"
+    },
+    "name": "TULSA",
+    "resource_uri": "/boundary/1.0/boundary/tulsa-county/",
+    "set": "/boundary/1.0/boundary-set/counties/",
+    "simple_shape": {
+        "coordinates": [
+            [
+                [
+                    [
+                        -95.761625,
+                        35.973807
+                    ],
+                    [
+                        -95.761563,
+                        35.9065
+                    ],
+                    ...
+                    ...
+                    ...,
+                    [
+                        -95.761683,
+                        36.162672
+                    ],
+                    [
+                        -95.761763,
+                        36.085538
+                    ],
+                    [
+                        -95.761625,
+                        35.973807
+                    ]
+                ]
+            ]
+        ],
+        "type": "MultiPolygon"
+    },
+    "slug": "tulsa-county"
+
+}'''
+EXAMPLE_PLACE = 'Fab Lab Tulsa'
+EXAMPLE_PLACE_LAT_LNG = '36.15061,-95.958351'
+EXAMPLE_UNIT = 'mile'
+EXAMPLE_UNIT_CODE = 'mi'
+# End Boundary Service demo settings
+
+try:
+    from settings_local import *
+except ImportError:
+    pass
+else:
+    try:
+        INSTALLED_APPS += LOCAL_INSTALLED_APPS
+        MIDDLEWARE_CLASSES += LOCAL_MIDDLEWARE_CLASSES
+    except:
+        pass

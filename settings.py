@@ -172,7 +172,7 @@ SHAPEFILES_SUBDIR = 'shapefiles'
 SHAPEFILES_DIR = 'media/%s' % SHAPEFILES_SUBDIR
 
 # Boundary Service demo settings
-API_DOMAIN = 'www.oklahomadata.org'
+API_DOMAIN = 'www.oklahomadata.org/boundary'
 EXAMPLE_SCOPE = 'Oklahoma'
 EXAMPLE_BOUNDARY_SET = 'municipal boundary'
 EXAMPLE_BOUNDARY_SETS = 'municipal boundaries' # plural

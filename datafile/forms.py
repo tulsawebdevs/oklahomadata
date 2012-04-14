@@ -1,4 +1,8 @@
 from django import forms
 
-class UploadForm(forms.Form):
-    csv_file = forms.FileField()
+from datafile.models import DataFile
+
+class UploadForm(forms.ModelForm):
+    class Meta:
+        model = DataFile
+        fields = ('file',)

@@ -1,16 +1,17 @@
 # Django settings for dataupload project.
 import os
 
+DEBUG = False
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
-DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 path = lambda *a: os.path.join(ROOT, *a)
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Josh Mize', 'jgmize@gmail.com'),
+    ('Buddy Lindsey', 'percent20@gmail.com')
 )
 
 MANAGERS = ADMINS
@@ -63,7 +64,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
+STATIC_ROOT = "%s/static" % path('.')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -149,13 +150,26 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'simple':{'format': '%(levelname)s: %(message)s'}
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
         }
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+	    'propagate':True
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',

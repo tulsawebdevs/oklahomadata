@@ -1,7 +1,6 @@
 django-debug-toolbar>=0.8.4
 ipdb>=0.3
 ipython>=0.10.1
+pep8
 pyflakes>=0.4.0
 Werkzeug>=0.8.3
-
-# what's up luke?

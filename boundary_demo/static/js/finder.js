@@ -1,22 +1,31 @@
-var geolocate_supported = true; // until prove false
+var geolocate_supported = true, // until prove false
 
-var geocoder = new google.maps.Geocoder();
-var southwest_limit = new L.LatLng(32.1342, -95.6219); // @todo Replace coordinates.
-var northeast_limit = new L.LatLng(32.6871, -94.9844); // @todo Replace coordinates.
-var bounding_box = new L.LatLngBounds(southwest_limit, northeast_limit);
-var outside = false; // until prove true
+    geocoder = new google.maps.Geocoder(),
+    southwest_limit = new L.LatLng(32.1342, -95.6219), // @todo Replace coordinates.
+    northeast_limit = new L.LatLng(32.6871, -94.9844), // @todo Replace coordinates.
+    bounding_box = new L.LatLngBounds(southwest_limit, northeast_limit),
+    outside = false, // until prove true
 
-var map = null;
+    map = null,
 
-var user_marker = null;
-var displayed_slug = null;
-var displayed_polygon = null;
+    user_marker = null,
+    displayed_boundary_slug = null,
+    displayed_polygon = null,
+    displayed_point_slug = null,
+    displayed_points = [],
 
-var boundaries = new Array();
+    boundaries = new Array(),
+    points = new Array(),
 
-var getGlobal = function(v){
-    return (typeof window[v] != 'undefined')?window[v]:null;
-}
+    getGlobal = function(v){return (typeof window[v] != 'undefined')?window[v]:null;},
+    point_marker_icon = L.Icon.extend({
+        iconUrl: '/leaflet/images/marker2.png',
+        shadowUrl: '/leaflet/images/marker-shadow.png',
+        iconSize: new L.Point(25, 41),
+        shadowSize: new L.Point(41, 41),
+        iconAnchor: new L.Point(13, 41),
+        popupAnchor: new L.Point(0, -33)
+    })
 
 function init_map(lat, lng) {
     if (map == null) {
@@ -119,6 +128,7 @@ function process_location(lat, lng) {
     init_map(lat, lng);
     show_user_marker(lat, lng);
     get_boundaries(lat, lng);
+    get_points(lat, lng);
 }
 
 function save_last_location(location) {
@@ -191,18 +201,17 @@ function alt_addresses(results) {
 
 // Use boundary service to lookup what areas the location falls within
 function get_boundaries(lat, lng) {
-    var table_html = '<h3>This location is within:</h3><table id="boundaries" border="0" cellpadding="0" cellspacing="0">';
-    var query_url = '1.0/boundary/?limit=100&contains=' + lat + ',' + lng + '';
-
-    displayed_kind = null;
-    for_display = null;
+    var table_html = '<h3>This location is within:</h3><table id="boundaries" border="0" cellpadding="0" cellspacing="0">',
+        query_url = '1.0/boundary/?limit=100&contains=' + lat + ',' + lng + '',
+        displayed_kind = null,
+        for_display = null;
 
     if (displayed_polygon != null) {
         // Hide old polygon
-        displayed_kind = boundaries[displayed_slug].kind;
+        displayed_kind = boundaries[displayed_boundary_slug].kind;
         map.removeLayer(displayed_polygon);
         displayed_polygon = null;
-        displayed_slug = null;
+        displayed_boundary_slug = null;
     }
 
     // Clear old boundaries
@@ -219,10 +228,46 @@ function get_boundaries(lat, lng) {
             }
         });
         table_html += '</table>';
-        $('#area-lookup').html(table_html);
+        $('#area-lookup-boundaries').html(table_html);
 
         if (for_display != null) {
             display_boundary(for_display.slug, true);
+        }
+    });
+}
+
+function get_points(lat, lng) {
+    var table_html = '<h3>Points within 1 mile of this:</h3><table id="points" border="0" cellpadding="0" cellspacing="0">',
+        query_url = '1.0/point/?limit=100&near=' + lat + ',' + lng + ',1mi',
+        displayed_kind = null,
+        for_display = null;
+
+    if (displayed_points.length) {
+        // Hide old polygon
+        displayed_kind = points[displayed_point_slug].kind;
+        map.removeLayer(displayed_points);
+        displayed_points = [];
+        displayed_point_slug = null;
+    }
+
+    // Clear old points
+    points.length = 0;
+
+    $.getJSON(query_url, function(data) {
+        $.each(data.objects, function(i, obj) {
+            points[obj.slug] = obj;
+            table_html += '<tr id="' + obj.slug + '"><td>' + obj.kind + '</td><td><strong><a href="javascript:display_point(\'' + obj.slug + '\');">' + obj.name + '</a></strong></td></td>';
+
+            // Try to display a new polygon of the same kind as the last shown
+            if (displayed_kind != null && obj.kind == displayed_kind) {
+                for_display = obj; 
+            }
+        });
+        table_html += '</table>';
+        $('#area-lookup-points').html(table_html);
+
+        if (for_display != null) {
+            display_point(for_display.slug, true);
         }
     });
 }
@@ -232,7 +277,7 @@ function display_boundary(slug, no_fit) {
     if (displayed_polygon != null) {
         map.removeLayer(displayed_polygon);
         displayed_polygon = null;
-        displayed_slug = null;
+        displayed_boundary_slug = null;
 
         $("#boundaries .selected").removeClass("selected");
     }
@@ -270,10 +315,47 @@ function display_boundary(slug, no_fit) {
         fillOpacity: 0.2
     });
 
-    displayed_slug = slug;
+    displayed_boundary_slug = slug;
     map.addLayer(displayed_polygon);
 
     $("#boundaries #" + slug).addClass("selected");
+
+    if (!no_fit) {
+        map.fitBounds(bounds);
+    }
+}
+
+function display_point(slug, no_fit) {
+    // Clear old points 
+    if (displayed_points.length) {
+        for(var p = 0; p < displayed_points.length; p++){
+            map.removeLayer(displayed_points[p]);
+        }
+        displayed_points = [];
+        displayed_boundary_slug = null;
+
+        $("#points .selected").removeClass("selected");
+    }
+
+    // Construct new polygons
+    var coords = points[slug]["point"].coordinates,
+        bounds = null;
+
+    $.each(coords, function(i, p){
+        var ll = new L.LatLng(p[1], p[0]),
+            marker = new L.Marker(ll, {icon: new point_marker_icon()});
+        displayed_points.push(marker);
+        map.addLayer(marker);
+
+        if (bounds === null) {
+            bounds = new L.LatLngBounds(ll, ll);
+        } else {
+            bounds.extend(ll);
+        }
+    });
+    displayed_point_slug = slug;
+
+    $("#points #" + slug).addClass("selected");
 
     if (!no_fit) {
         map.fitBounds(bounds);

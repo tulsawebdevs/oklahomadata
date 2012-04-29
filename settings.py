@@ -11,7 +11,8 @@ path = lambda *a: os.path.join(ROOT, *a)
 
 ADMINS = (
     ('Josh Mize', 'jgmize@gmail.com'),
-    ('Buddy Lindsey', 'percent20@gmail.com')
+    ('Buddy Lindsey', 'percent20@gmail.com'),
+    ('Jeremy Satterfield', 'jsatt22@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -35,7 +36,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'UTC'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -109,7 +110,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'oklahomadata.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -168,12 +169,17 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'DEBUG',
-	    'propagate':True
+            'propagate':True
         },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        'okdata': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate':True
         },
     }
 }
@@ -294,6 +300,9 @@ except ImportError:
 else:
     try:
         INSTALLED_APPS += LOCAL_INSTALLED_APPS
+    except:
+        pass
+    try:
         MIDDLEWARE_CLASSES += LOCAL_MIDDLEWARE_CLASSES
     except:
         pass

@@ -31,7 +31,7 @@ class DataFile(TimeStampedModel):
     data = JSONField(blank=True)
 
     def __unicode__(self):
-        return unicode(self.file.name)
+        return unicode(self.title)
 
     def build_meta_from_dict(self, data):
         fieldnames = set()

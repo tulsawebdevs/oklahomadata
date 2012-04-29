@@ -4,6 +4,7 @@ import logging
 
 from django.conf import settings
 from django.db import models
+from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 from django_extensions.db.models import TimeStampedModel
 from django_extensions.db.fields import AutoSlugField
@@ -11,7 +12,7 @@ from django_extensions.db.fields.json import JSONField
 
 
 settings.DATAFILES_SUBDIR = getattr(settings, 'DATAFILES_SUBDIR',
-                                     'datafiles')
+                                    'datafiles')
 logger = logging.getLogger('okdata')
 
 
@@ -123,3 +124,8 @@ class DataFile(TimeStampedModel):
         except:
             pass
         return False
+
+@receiver(models.signals.post_save, sender=DataFile)
+def post_create_handler(sender, instance, created, **kwargs):
+    if created:
+        instance.parse_data()

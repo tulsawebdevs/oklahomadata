@@ -57,8 +57,8 @@ class DataFile(TimeStampedModel):
         if self.validate_csv():
             data = list()
             for row in self.filedata:
-                data.append([{self.transform_fieldname(fieldname): value}
-                             for fieldname, value in row.items()])
+                data.append({self.transform_fieldname(fieldname): value
+                             for fieldname, value in row.items()})
 
             meta = {
                 'columns': [{'fieldname': self.transform_fieldname(fieldname)}

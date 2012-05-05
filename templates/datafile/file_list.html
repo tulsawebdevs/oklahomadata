@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Source</th>
+            <th>Uploaded</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in datafile_list %}
+        <tr>
+            <td><a href="{% url datafile_details file.slug %}">{{file.title}}</a></td>
+            <td>{{file.description|truncatechars:200}}</td>
+            <td><a href="{{file.source_url}}" target="_blank">{{file.source}}</a></td>
+            <td>{{file.created|date:"Y-m-d"}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-I am an upload form
 <form action="." method="post" accept-charset="utf-8" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}

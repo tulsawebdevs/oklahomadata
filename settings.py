@@ -141,6 +141,7 @@ INSTALLED_APPS = (
     #WebDevs
     'boundary_demo',
     'datafile',
+    'utils',
 )
 
 # A sample logging configuration. The only tangible logging

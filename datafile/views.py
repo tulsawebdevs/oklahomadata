@@ -1,3 +1,6 @@
+from csv import DictWriter
+import StringIO
+
 from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.views.generic import DetailView, FormView, ListView, View
@@ -17,23 +20,48 @@ class DataFileDownload(SingleObjectMixin, View):
     file_field = 'file'
 
     def get(self, request, *args, **kwargs):
+        dl_type = self.kwargs.get('download_type', '')
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
-        try:
-            self.file_obj = getattr(self.object, self.file_field)
-        except AttributeError:
-            raise Http404
-        else:
+        if dl_type == 'raw':
+            try:
+                file_obj = getattr(self.object, self.file_field)
+            except AttributeError:
+                raise Http404
+            data = file_obj.read()
+            filetype = self.object.filetype
             if self.object.filetype == 'json':
                 mimetype = 'application/json'
             else:
                 assert self.object.filetype == 'csv'
                 mimetype = 'text/csv'
-            response =  HttpResponse(self.file_obj.file.read(),
-                                     content_type=mimetype)
-            response['Content-Disposition'] = 'filename=%s.%s' % (
-                self.file_obj.name.split('/')[-1], self.object.filetype)
-            return response
+        elif dl_type == 'json':
+            if self.object.data:
+                data = str(self.object.data)
+                mimetype = 'application/json'
+                filetype = 'json'
+            else:
+                raise Http404
+        elif dl_type == 'csv':
+            if self.object.data:
+                f = StringIO.StringIO()
+                dw = DictWriter(
+                    f, [field['fieldname']
+                        for field in self.object.data['meta']['columns']])
+                dw.writeheader()
+                dw.writerows(self.object.data['data'])
+                data = f.getvalue()
+                f.close()
+                mimetype = 'text/csv'
+                filetype = 'csv'
+            else:
+                raise Http404
+        else:
+            raise Http404
+        response =  HttpResponse(data, content_type=mimetype)
+        response['Content-Disposition'] = 'filename=%s.%s' % (
+            self.object.slug, filetype)
+        return response
 
 
 class DataFilesList(ListView):

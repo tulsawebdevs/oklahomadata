@@ -4,7 +4,9 @@
 {{datafile.title}}<br />
 {{datafile.description}}<br />
 <a href="{{datafile.source_url}}" target="_blank">{{datafile.source}}</a><br />
-<a href="{% url datafile_download datafile.slug %}">Raw Data</a><br />
+<a href="{% url datafile_download datafile.slug "raw" %}">Download Raw Data</a><br />
+<a href="{% url datafile_download datafile.slug "json" %}">Download as JSON</a><br />
+<a href="{% url datafile_download datafile.slug "csv" %}">Download as CSV</a><br />
 {% if datafile.data %}
 {% with metadata=datafile.data.meta data=datafile.data.data %}
     {{metadata.records}} records<br />

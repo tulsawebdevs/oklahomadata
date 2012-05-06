@@ -64,7 +64,7 @@ class DataFile(TimeStampedModel):
             data = list()
             for row in self.filedata:
                 data.append(dict([(self.transform_fieldname(fieldname), value)
-                                  for fieldname, value in row.items()]})
+                                  for fieldname, value in row.items()]))
 
             meta = self.build_metadata(data)
             meta['columns'] = [

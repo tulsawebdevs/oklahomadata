@@ -35,7 +35,6 @@ class DataFile(TimeStampedModel):
 
     def build_columns_from_dict(self, data):
         fieldnames = set()
-        import ipdb; ipdb.set_trace()
         for row in data:
             for fieldname in row.keys():
                 fieldnames.add(fieldname)

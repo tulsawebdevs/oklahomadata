@@ -33,13 +33,20 @@ class DataFile(TimeStampedModel):
     def __unicode__(self):
         return unicode(self.title)
 
-    def build_meta_from_dict(self, data):
+    def build_columns_from_dict(self, data):
         fieldnames = set()
+        import ipdb; ipdb.set_trace()
         for row in data:
             for fieldname in row.keys():
                 fieldnames.add(fieldname)
-        return {'columns': [{'fieldname': self.transform_fieldname(field)}
-                            for field in fieldnames],
+        return [{'fieldname': self.transform_fieldname(field),
+                 'label': field} for field in fieldnames]
+
+    def build_metadata(self, data):
+        return {'title': self.title,
+                'description': self.description,
+                'source': self.source,
+                'source_url': self.source_url,
                 'records': len(data)}
 
     @property
@@ -60,11 +67,11 @@ class DataFile(TimeStampedModel):
                 data.append({self.transform_fieldname(fieldname): value
                              for fieldname, value in row.items()})
 
-            meta = {
-                'columns': [{'fieldname': self.transform_fieldname(fieldname)}
-                            for fieldname in self.filedata.fieldnames],
-                'records': len(data),
-            }
+            meta = self.build_metadata(data)
+            meta['columns'] = [
+                {'fieldname': self.transform_fieldname(fieldname),
+                 'label': fieldname}
+                for fieldname in self.filedata.fieldnames]
             return {'meta': meta, 'data': data}
         else:
             logger.warning('File is not a parsable csv structure.')
@@ -90,10 +97,15 @@ class DataFile(TimeStampedModel):
                 data = self.filedata
                 if not 'meta' in self.filedata.keys():
                     data['meta'] = {}
-                data['meta'].update(self.build_meta_from_dict(data['data']))
+                data['meta'].update(self.build_metadata(data['data']))
+                if not data['meta']['columns']:
+                    data['meta']['columns'] = self.build_columns_from_dict(
+                        data['data'])
             elif isinstance(self.filedata, list):
                 data['data'] = self.filedata
-                data['meta'] = self.build_meta_from_dict(self.filedata)
+                data['meta'] = self.build_metadata(data['data'])
+                data['meta']['columns'] = self.build_columns_from_dict(
+                    data['data'])
 
             return data
         else:
@@ -124,6 +136,7 @@ class DataFile(TimeStampedModel):
         except:
             pass
         return False
+
 
 @receiver(models.signals.post_save, sender=DataFile)
 def post_create_handler(sender, instance, created, **kwargs):

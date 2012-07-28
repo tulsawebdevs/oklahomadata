@@ -10,7 +10,7 @@
 {% if datafile.data %}
 {% with metadata=datafile.data.meta data=datafile.data.data %}
     {{metadata.records}} records<br />
-    <table>
+    <table class="table table-striped table-bordered table-condensed">
         <thead>
             <tr>
                 {% for column in metadata.columns %}

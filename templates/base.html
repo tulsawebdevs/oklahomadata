@@ -3,6 +3,8 @@
     <head>
         <title>Upload CSV</title>
         <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.min.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="{{STATIC_URL}}js/bootstrap.min.js"></script> 
         {% block head %}
         {% endblock %}
     </head>
@@ -20,8 +22,14 @@
                 <div class="navbar-inner">
                     <div class="container">
                         <ul class="nav">
-                            <li><a href="/boundary">Boundary Demo</a></li>
-                            <li><a href="{% url upload_form %}">Upload Data</a></li>
+                            <li><a href="{% url boundary_demo_index %}">Boundary Demo</a></li>
+                            <li class="dropdown">
+                                <a href="#" data-toggle="dropdown" class="dropdown-toggle">Data <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{% url upload_form %}">Upload Data</a></li>
+                                    <li><a href="{% url datafile_list %}">Files</a></li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                 </div>

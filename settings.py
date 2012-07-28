@@ -135,7 +135,6 @@ INSTALLED_APPS = (
     'boundaryservice',
     'compressor',
     'django_extensions',
-    'sapling',
     'south',
     'tastypie',
 
